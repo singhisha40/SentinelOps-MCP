@@ -5,5 +5,5 @@ export const getDeviceSchema = z.object({
 });
 
 export const listDevicesSchema = z.object({
-  employeeId: z.string().optional(),
+  employeeId: z.string().min(1).optional(),
 });

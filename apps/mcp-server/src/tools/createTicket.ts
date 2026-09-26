@@ -1,5 +1,8 @@
 import { createTicket } from "../../../../packages/domain/ticket.js";
 import { createTicketSchema } from "../../../../packages/schemas/ticket.js";
+import { getCurrentActor } from "../auth/auth.js";
+import { authorize } from "../policies/authorize.js";
+import { policies } from "../policies/policies.js";
 
 export function registerCreateTicketTool(server: any) {
   server.registerTool(
@@ -18,7 +21,35 @@ export function registerCreateTicketTool(server: any) {
       priority: string;
     }) => {
       try {
-        const ticket = await createTicket(input);
+        const actor = getCurrentActor();
+
+        const effectiveEmployeeId =
+          actor.role === "EMPLOYEE"
+            ? actor.employeeId
+            : input.employeeId;
+
+        const policy = policies.create_ticket;
+
+        const decision = authorize(actor, policy, {
+          employee_id: effectiveEmployeeId,
+        });
+
+        if (!decision.allowed) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: decision.reason,
+              },
+            ],
+            isError: true,
+          };
+        }
+
+        const ticket = await createTicket({
+          ...input,
+          employeeId: effectiveEmployeeId,
+        });
 
         return {
           content: [
@@ -33,7 +64,10 @@ export function registerCreateTicketTool(server: any) {
           content: [
             {
               type: "text",
-              text: error instanceof Error ? error.message : "Unknown error",
+              text:
+                error instanceof Error
+                  ? error.message
+                  : "Unknown error",
             },
           ],
           isError: true,

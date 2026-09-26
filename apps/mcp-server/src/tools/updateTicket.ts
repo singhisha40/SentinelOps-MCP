@@ -1,5 +1,8 @@
-import { updateTicket } from "../../../../packages/domain/ticket.js";
+import { getTicket, updateTicket } from "../../../../packages/domain/ticket.js";
 import { updateTicketSchema } from "../../../../packages/schemas/ticket.js";
+import { getCurrentActor } from "../auth/auth.js";
+import { authorize } from "../policies/authorize.js";
+import { policies } from "../policies/policies.js";
 
 export function registerUpdateTicketTool(server: any) {
   server.registerTool(
@@ -18,6 +21,26 @@ export function registerUpdateTicketTool(server: any) {
       assignedTo?: string;
     }) => {
       try {
+        const actor = getCurrentActor();
+
+        const existingTicket = await getTicket(input.id);
+
+        const policy = policies.update_ticket;
+
+        const decision = authorize(actor, policy, existingTicket);
+
+        if (!decision.allowed) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: decision.reason,
+              },
+            ],
+            isError: true,
+          };
+        }
+
         const ticket = await updateTicket(input);
 
         return {
@@ -33,7 +56,10 @@ export function registerUpdateTicketTool(server: any) {
           content: [
             {
               type: "text",
-              text: error instanceof Error ? error.message : "Unknown error",
+              text:
+                error instanceof Error
+                  ? error.message
+                  : "Unknown error",
             },
           ],
           isError: true,

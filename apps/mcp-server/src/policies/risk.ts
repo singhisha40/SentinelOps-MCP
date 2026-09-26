@@ -1,0 +1,5 @@
+export type RiskLevel =
+  | "LOW"
+  | "MEDIUM"
+  | "HIGH"
+  | "CRITICAL";

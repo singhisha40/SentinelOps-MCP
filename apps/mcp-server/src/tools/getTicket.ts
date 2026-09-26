@@ -1,5 +1,8 @@
 import { getTicket } from "../../../../packages/domain/ticket.js";
 import { getTicketSchema } from "../../../../packages/schemas/ticket.js";
+import { getCurrentActor } from "../auth/auth.js";
+import { authorize } from "../policies/authorize.js";
+import { policies } from "../policies/policies.js";
 
 export function registerGetTicketTool(server: any) {
   server.registerTool(
@@ -10,7 +13,24 @@ export function registerGetTicketTool(server: any) {
     },
     async ({ id }: { id: string }) => {
       try {
+        const actor = getCurrentActor();
         const ticket = await getTicket(id);
+
+        const policy = policies.get_ticket;
+
+        const decision = authorize(actor, policy, ticket);
+
+        if (!decision.allowed) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: decision.reason,
+              },
+            ],
+            isError: true,
+          };
+        }
 
         return {
           content: [

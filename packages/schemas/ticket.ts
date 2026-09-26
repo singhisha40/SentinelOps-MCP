@@ -5,25 +5,38 @@ export const getTicketSchema = z.object({
 });
 
 export const searchTicketsSchema = z.object({
-  query: z.string().optional(),
+  query: z.string().min(1).optional(),
 });
 
 export const createTicketSchema = z.object({
   id: z.string().min(1),
   employeeId: z.string().min(1),
-  deviceId: z.string().optional(),
+  deviceId: z.string().min(1).optional(),
   title: z.string().min(1),
   description: z.string().min(1),
-  category: z.string().optional(),
-  priority: z.string().default("MEDIUM"),
+  category: z.string().min(1).optional(),
+  priority: z.string().min(1).default("MEDIUM"),
 });
 
-export const updateTicketSchema = z.object({
-  id: z.string().min(1),
-  title: z.string().min(1).optional(),
-  description: z.string().min(1).optional(),
-  category: z.string().optional(),
-  priority: z.string().optional(),
-  status: z.string().optional(),
-  assignedTo: z.string().optional(),
-});
+export const updateTicketSchema = z
+  .object({
+    id: z.string().min(1),
+    title: z.string().min(1).optional(),
+    description: z.string().min(1).optional(),
+    category: z.string().min(1).optional(),
+    priority: z.string().min(1).optional(),
+    status: z.string().min(1).optional(),
+    assignedTo: z.string().min(1).optional(),
+  })
+  .refine(
+    (data) =>
+      data.title !== undefined ||
+      data.description !== undefined ||
+      data.category !== undefined ||
+      data.priority !== undefined ||
+      data.status !== undefined ||
+      data.assignedTo !== undefined,
+    {
+      message: "At least one field must be provided for update",
+    }
+  );

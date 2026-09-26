@@ -13,7 +13,10 @@ export async function getTicket(id: string) {
 
   return data;
 }
-export async function searchTickets(query?: string) {
+export async function searchTickets(
+  query?: string,
+  employeeId?: string
+) {
   let request = supabase
     .from("tickets")
     .select("*")
@@ -23,6 +26,10 @@ export async function searchTickets(query?: string) {
     request = request.or(
       `title.ilike.%${query}%,description.ilike.%${query}%`
     );
+  }
+
+  if (employeeId) {
+    request = request.eq("employee_id", employeeId);
   }
 
   const { data, error } = await request;

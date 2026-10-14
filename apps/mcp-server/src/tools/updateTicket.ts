@@ -3,6 +3,7 @@ import { updateTicketSchema } from "../../../../packages/schemas/ticket.js";
 import { getCurrentActor } from "../auth/auth.js";
 import { authorize } from "../policies/authorize.js";
 import { policies } from "../policies/policies.js";
+import { audit } from "../audit/audit.js";
 
 export function registerUpdateTicketTool(server: any) {
   server.registerTool(
@@ -30,6 +31,18 @@ export function registerUpdateTicketTool(server: any) {
         const decision = authorize(actor, policy, existingTicket);
 
         if (!decision.allowed) {
+          audit({
+            actor: actor.id,
+            operation: "update_ticket",
+            resource: input.id,
+            result: "auth_rejection",
+            timestamp: new Date().toISOString(),
+            metadata: {
+              tool: "update_ticket",
+              reason: decision.reason,
+            },
+          });
+
           return {
             content: [
               {
@@ -43,6 +56,17 @@ export function registerUpdateTicketTool(server: any) {
 
         const ticket = await updateTicket(input);
 
+        audit({
+          actor: actor.id,
+          operation: "update_ticket",
+          resource: input.id,
+          result: "success",
+          timestamp: new Date().toISOString(),
+          metadata: {
+            tool: "update_ticket",
+          },
+        });
+
         return {
           content: [
             {
@@ -52,6 +76,19 @@ export function registerUpdateTicketTool(server: any) {
           ],
         };
       } catch (error) {
+        audit({
+          actor: getCurrentActor().id,
+          operation: "update_ticket",
+          resource: input.id,
+          result: "failure",
+          timestamp: new Date().toISOString(),
+          metadata: {
+            tool: "update_ticket",
+            error:
+              error instanceof Error ? error.message : "Unknown error",
+          },
+        });
+
         return {
           content: [
             {

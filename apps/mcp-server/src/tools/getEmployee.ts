@@ -3,6 +3,7 @@ import { getEmployeeSchema } from "../../../../packages/schemas/employee.js";
 import { getCurrentActor } from "../auth/auth.js";
 import { authorize } from "../policies/authorize.js";
 import { policies } from "../policies/policies.js";
+import { audit } from "../audit/audit.js";
 
 export function registerGetEmployeeTool(server: any) {
   server.registerTool(
@@ -22,18 +23,34 @@ export function registerGetEmployeeTool(server: any) {
         });
 
         if (!decision.allowed) {
+          audit({
+            actor: actor.id,
+            operation: "get_employee",
+            resource: id,
+            result: "auth_rejection",
+            timestamp: new Date().toISOString(),
+            metadata: {
+              tool: "get_employee",
+              reason: decision.reason,
+            },
+          });
+
           return {
-            content: [
-              {
-                type: "text",
-                text: decision.reason,
-              },
-            ],
+            content: [{ type: "text", text: decision.reason }],
             isError: true,
           };
         }
 
         const employee = await getEmployee(id);
+
+        audit({
+          actor: actor.id,
+          operation: "get_employee",
+          resource: id,
+          result: "success",
+          timestamp: new Date().toISOString(),
+          metadata: { tool: "get_employee" },
+        });
 
         return {
           content: [
@@ -44,14 +61,23 @@ export function registerGetEmployeeTool(server: any) {
           ],
         };
       } catch (error) {
+        audit({
+          actor: getCurrentActor().id,
+          operation: "get_employee",
+          resource: id,
+          result: "failure",
+          timestamp: new Date().toISOString(),
+          metadata: {
+            tool: "get_employee",
+            error: error instanceof Error ? error.message : "Unknown error",
+          },
+        });
+
         return {
           content: [
             {
               type: "text",
-              text:
-                error instanceof Error
-                  ? error.message
-                  : "Unknown error",
+              text: error instanceof Error ? error.message : "Unknown error",
             },
           ],
           isError: true,

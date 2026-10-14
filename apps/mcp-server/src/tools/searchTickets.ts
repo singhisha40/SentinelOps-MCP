@@ -3,6 +3,8 @@ import { searchTicketsSchema } from "../../../../packages/schemas/ticket.js";
 import { getCurrentActor } from "../auth/auth.js";
 import { authorize } from "../policies/authorize.js";
 import { policies } from "../policies/policies.js";
+import { audit } from "../audit/audit.js";
+import { markAsUntrustedContent } from "../security/untrustedContent.js";
 
 export function registerSearchTicketsTool(server: any) {
   server.registerTool(
@@ -22,13 +24,20 @@ export function registerSearchTicketsTool(server: any) {
         });
 
         if (!decision.allowed) {
+          audit({
+            actor: actor.id,
+            operation: "search_tickets",
+            resource: query ?? "all",
+            result: "auth_rejection",
+            timestamp: new Date().toISOString(),
+            metadata: {
+              tool: "search_tickets",
+              reason: decision.reason,
+            },
+          });
+
           return {
-            content: [
-              {
-                type: "text",
-                text: decision.reason,
-              },
-            ],
+            content: [{ type: "text", text: decision.reason }],
             isError: true,
           };
         }
@@ -43,15 +52,38 @@ export function registerSearchTicketsTool(server: any) {
           effectiveEmployeeId
         );
 
+        audit({
+          actor: actor.id,
+          operation: "search_tickets",
+          resource: query ?? "all",
+          result: "success",
+          timestamp: new Date().toISOString(),
+          metadata: { tool: "search_tickets" },
+        });
+
         return {
           content: [
             {
               type: "text",
-              text: JSON.stringify(tickets, null, 2),
+              text: markAsUntrustedContent(
+                JSON.stringify(tickets, null, 2)
+              ),
             },
           ],
         };
       } catch (error) {
+        audit({
+          actor: getCurrentActor().id,
+          operation: "search_tickets",
+          resource: query ?? "all",
+          result: "failure",
+          timestamp: new Date().toISOString(),
+          metadata: {
+            tool: "search_tickets",
+            error: error instanceof Error ? error.message : "Unknown error",
+          },
+        });
+
         return {
           content: [
             {

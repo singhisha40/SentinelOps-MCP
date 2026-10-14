@@ -15,7 +15,7 @@ export const policies = {
     approvalCount: 0,
   },
 
-    get_employee: {
+  get_employee: {
     operation: "get_employee",
     riskLevel: "LOW",
     requiredRoles: [
@@ -41,7 +41,7 @@ export const policies = {
     approvalCount: 0,
   },
 
-    update_ticket: {
+  update_ticket: {
     operation: "update_ticket",
     riskLevel: "LOW",
     requiredRoles: [
@@ -54,7 +54,7 @@ export const policies = {
     approvalCount: 0,
   },
 
-    get_ticket: {
+  get_ticket: {
     operation: "get_ticket",
     riskLevel: "LOW",
     requiredRoles: [
@@ -67,8 +67,7 @@ export const policies = {
     approvalCount: 0,
   },
 
-  
-    search_tickets: {
+  search_tickets: {
     operation: "search_tickets",
     riskLevel: "LOW",
     requiredRoles: [
@@ -92,5 +91,18 @@ export const policies = {
     ],
     approvalRequired: false,
     approvalCount: 0,
+  },
+
+  reset_vpn: {
+    operation: "reset_vpn",
+    riskLevel: "HIGH",
+    requiredRoles: [
+      "EMPLOYEE",
+      "IT_SUPPORT",
+      "IT_ADMINISTRATOR",
+      "SECURITY_ADMIN",
+    ],
+    approvalRequired: true,
+    approvalCount: 1,
   },
 } satisfies Record<Operation, OperationPolicy>;

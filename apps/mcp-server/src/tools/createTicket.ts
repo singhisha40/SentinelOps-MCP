@@ -3,6 +3,7 @@ import { createTicketSchema } from "../../../../packages/schemas/ticket.js";
 import { getCurrentActor } from "../auth/auth.js";
 import { authorize } from "../policies/authorize.js";
 import { policies } from "../policies/policies.js";
+import { audit } from "../audit/audit.js";
 
 export function registerCreateTicketTool(server: any) {
   server.registerTool(
@@ -35,6 +36,18 @@ export function registerCreateTicketTool(server: any) {
         });
 
         if (!decision.allowed) {
+          audit({
+            actor: actor.id,
+            operation: "create_ticket",
+            resource: input.id,
+            result: "auth_rejection",
+            timestamp: new Date().toISOString(),
+            metadata: {
+              tool: "create_ticket",
+              reason: decision.reason,
+            },
+          });
+
           return {
             content: [
               {
@@ -51,6 +64,17 @@ export function registerCreateTicketTool(server: any) {
           employeeId: effectiveEmployeeId,
         });
 
+        audit({
+          actor: actor.id,
+          operation: "create_ticket",
+          resource: input.id,
+          result: "success",
+          timestamp: new Date().toISOString(),
+          metadata: {
+            tool: "create_ticket",
+          },
+        });
+
         return {
           content: [
             {
@@ -60,6 +84,19 @@ export function registerCreateTicketTool(server: any) {
           ],
         };
       } catch (error) {
+        audit({
+          actor: getCurrentActor().id,
+          operation: "create_ticket",
+          resource: input.id,
+          result: "failure",
+          timestamp: new Date().toISOString(),
+          metadata: {
+            tool: "create_ticket",
+            error:
+              error instanceof Error ? error.message : "Unknown error",
+          },
+        });
+
         return {
           content: [
             {

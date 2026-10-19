@@ -130,3 +130,59 @@ export async function updateTicket(input: {
 
   return data;
 }
+
+export const TICKET_STATUS = {
+  OPEN: "OPEN",
+  IN_PROGRESS: "IN_PROGRESS",
+  RESOLVED: "RESOLVED",
+  CLOSED: "CLOSED",
+} as const;
+
+// Pure state-transition rules, kept separate so they are easy to unit test.
+export function canCloseTicket(status: string): boolean {
+  return status !== TICKET_STATUS.CLOSED;
+}
+
+export function canReopenTicket(status: string): boolean {
+  return (
+    status === TICKET_STATUS.CLOSED || status === TICKET_STATUS.RESOLVED
+  );
+}
+
+export function canAssignTicket(status: string): boolean {
+  return status !== TICKET_STATUS.CLOSED;
+}
+
+async function setTicketFields(
+  id: string,
+  fields: { status?: string; assigned_to?: string },
+  action: string
+) {
+  const { data, error } = await supabase
+    .from("tickets")
+    .update({
+      ...fields,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to ${action} ticket: ${error.message}`);
+  }
+
+  return data;
+}
+
+export async function assignTicket(id: string, assigneeId: string) {
+  return setTicketFields(id, { assigned_to: assigneeId }, "assign");
+}
+
+export async function closeTicket(id: string) {
+  return setTicketFields(id, { status: TICKET_STATUS.CLOSED }, "close");
+}
+
+export async function reopenTicket(id: string) {
+  return setTicketFields(id, { status: TICKET_STATUS.OPEN }, "reopen");
+}

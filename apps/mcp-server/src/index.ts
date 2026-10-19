@@ -12,6 +12,10 @@ import { registerDeviceResource } from "./resources/device.js";
 import { registerTicketResource } from "./resources/ticket.js";
 import { registerApprovalTools } from "./tools/approval.js";
 import { registerResetVpnTool } from "./tools/resetVpn.js";
+import { registerAssignTicketTool } from "./tools/assignTicket.js";
+import { registerCloseTicketTool } from "./tools/closeTicket.js";
+import { registerReopenTicketTool } from "./tools/reopenTicket.js";
+import { registerGetPolicyTool } from "./tools/getPolicy.js";
 
 const server = new McpServer({
   name: "sentinelops",
@@ -25,6 +29,10 @@ registerGetTicketTool(server);
 registerSearchTicketsTool(server);
 registerCreateTicketTool(server);
 registerUpdateTicketTool(server);
+registerAssignTicketTool(server);
+registerCloseTicketTool(server);
+registerReopenTicketTool(server);
+registerGetPolicyTool(server);
 
 registerApprovalTools(server);
 registerResetVpnTool(server);

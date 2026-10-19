@@ -40,3 +40,16 @@ export const updateTicketSchema = z
       message: "At least one field must be provided for update",
     }
   );
+
+export const assignTicketSchema = z.object({
+  id: z.string().min(1),
+  assigneeId: z.string().min(1),
+});
+
+export const closeTicketSchema = z.object({
+  id: z.string().min(1),
+});
+
+export const reopenTicketSchema = z.object({
+  id: z.string().min(1),
+});

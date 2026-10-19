@@ -10,6 +10,10 @@ export const permissions: Record<Role, Operation[]> = {
     "search_tickets",
     "create_ticket",
     "update_ticket",
+    "reset_vpn",
+    "close_ticket",
+    "reopen_ticket",
+    "get_policy",
   ],
 
   IT_SUPPORT: [
@@ -20,6 +24,11 @@ export const permissions: Record<Role, Operation[]> = {
     "search_tickets",
     "create_ticket",
     "update_ticket",
+    "reset_vpn",
+    "assign_ticket",
+    "close_ticket",
+    "reopen_ticket",
+    "get_policy",
   ],
 
   IT_ADMINISTRATOR: [
@@ -30,6 +39,11 @@ export const permissions: Record<Role, Operation[]> = {
     "search_tickets",
     "create_ticket",
     "update_ticket",
+    "reset_vpn",
+    "assign_ticket",
+    "close_ticket",
+    "reopen_ticket",
+    "get_policy",
   ],
 
   SECURITY_ADMIN: [
@@ -40,5 +54,10 @@ export const permissions: Record<Role, Operation[]> = {
     "search_tickets",
     "create_ticket",
     "update_ticket",
+    "reset_vpn",
+    "assign_ticket",
+    "close_ticket",
+    "reopen_ticket",
+    "get_policy",
   ],
 };

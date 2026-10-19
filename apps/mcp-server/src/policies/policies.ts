@@ -105,4 +105,54 @@ export const policies = {
     approvalRequired: true,
     approvalCount: 1,
   },
+  assign_ticket: {
+    operation: "assign_ticket",
+    riskLevel: "MEDIUM",
+    requiredRoles: [
+      "IT_SUPPORT",
+      "IT_ADMINISTRATOR",
+      "SECURITY_ADMIN",
+    ],
+    approvalRequired: false,
+    approvalCount: 0,
+  },
+
+  close_ticket: {
+    operation: "close_ticket",
+    riskLevel: "LOW",
+    requiredRoles: [
+      "EMPLOYEE",
+      "IT_SUPPORT",
+      "IT_ADMINISTRATOR",
+      "SECURITY_ADMIN",
+    ],
+    approvalRequired: false,
+    approvalCount: 0,
+  },
+
+  reopen_ticket: {
+    operation: "reopen_ticket",
+    riskLevel: "LOW",
+    requiredRoles: [
+      "EMPLOYEE",
+      "IT_SUPPORT",
+      "IT_ADMINISTRATOR",
+      "SECURITY_ADMIN",
+    ],
+    approvalRequired: false,
+    approvalCount: 0,
+  },
+
+  get_policy: {
+    operation: "get_policy",
+    riskLevel: "LOW",
+    requiredRoles: [
+      "EMPLOYEE",
+      "IT_SUPPORT",
+      "IT_ADMINISTRATOR",
+      "SECURITY_ADMIN",
+    ],
+    approvalRequired: false,
+    approvalCount: 0,
+  },
 } satisfies Record<Operation, OperationPolicy>;

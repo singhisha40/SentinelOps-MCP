@@ -199,3 +199,30 @@ export async function validateApproval(
     parametersHash: data.parameters_hash,
   };
 }
+
+export async function getApproval(
+  approvalId: string
+): Promise<ApprovalRecord> {
+  const { data, error } = await supabase
+    .from("approvals")
+    .select("*")
+    .eq("id", approvalId)
+    .single();
+
+  if (error) {
+    throw new Error(`Approval not found: ${error.message}`);
+  }
+
+  return {
+    id: data.id,
+    operation: data.operation,
+    targetResource: data.target_resource,
+    requestedBy: data.requested_by,
+    riskLevel: data.risk_level,
+    status: data.status as ApprovalStatus,
+    approvedBy: data.approved_by,
+    expiresAt: data.expires_at,
+    createdAt: data.created_at,
+    parametersHash: data.parameters_hash,
+  };
+}

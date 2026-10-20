@@ -4,6 +4,7 @@ import {
   createApproval,
   approveApproval,
   rejectApproval,
+  getApproval,
 } from "../approvals/approval.js";
 import { audit } from "../audit/audit.js";
 
@@ -116,6 +117,31 @@ export function registerApprovalTools(server: any) {
               {
                 type: "text",
                 text: "Only an administrator can approve requests.",
+              },
+            ],
+            isError: true,
+          };
+        }
+
+        // Two-person rule: nobody may approve their own request.
+        const existing = await getApproval(approvalId);
+
+        if (existing.requestedBy === actor.id) {
+          audit({
+            actor: actor.id,
+            operation: "approve_request",
+            resource: approvalId,
+            result: "auth_rejection",
+            approval_id: approvalId,
+            timestamp: new Date().toISOString(),
+            metadata: { reason: "self_approval" },
+          });
+
+          return {
+            content: [
+              {
+                type: "text",
+                text: "You cannot approve your own request.",
               },
             ],
             isError: true,

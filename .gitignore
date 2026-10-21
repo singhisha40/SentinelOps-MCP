@@ -1,4 +1,21 @@
+# Dependencies
 node_modules/
+
+# Environment files (keep the example)
 .env
 .env.*
 !.env.example
+
+# Supabase CLI local metadata (project ref, pooler URL, versions)
+supabase/.temp/
+
+# Build output and logs
+dist/
+*.log
+npm-debug.log*
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
